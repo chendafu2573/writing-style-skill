@@ -1,0 +1,31 @@
+{
+  "topic": "台灯按钮体验",
+  "identity": "台灯按钮体验-示例",
+  "event_type": "创作",
+  "finalized": true,
+  "scope": "正文",
+  "scene": "使用体验",
+  "audience": "日常用品读者",
+  "source_summary": "虚构台灯体验素材",
+  "draft_id": "draft.py save 返回的编号",
+  "confirmed_final": "台灯试了三次才亮。按钮回弹有点慢，我先把说明书重新读了一遍。",
+  "anchor_overrides": [],
+  "review": [],
+  "time_sensitive": false,
+  "checked_at": null,
+  "sources": [
+    "用户提供素材"
+  ],
+  "scores": {
+    "natural": 5,
+    "faithful": 5,
+    "publishable": 5,
+    "reason": "正文已经发布"
+  },
+  "revision_of": null,
+  "publication_assets_checked": false,
+  "platform": null,
+  "title": null,
+  "asset_paths": [],
+  "asset_review": null
+}

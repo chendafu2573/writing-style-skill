@@ -1,0 +1,18 @@
+# 本机缓存与编辑器状态。
+__pycache__/
+*.py[cod]
+.DS_Store
+.obsidian/
+.venv/
+.env
+.env.*
+!.env.example
+
+# 运行后产生的个人文章、草稿、备份和考试记录。
+/assets/*-v*.md
+/assets/.finalize-journal.json
+/drafts/
+/backups/
+/evals/exam-runs/
+
+# 已跟踪的画像、偏好及日志仍会显示修改；公开提交前必须自行检查。

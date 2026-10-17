@@ -1,0 +1,13 @@
+{
+  "topic": "台灯按钮体验",
+  "input_source": "B",
+  "scene": "使用体验",
+  "original_material": "以下为虚构示例：台灯试了三次才亮，按钮回弹偏慢。",
+  "first_generated": "台灯试了三次才亮。按钮回弹有点慢，我先把说明书重新读了一遍。",
+  "anchors": [],
+  "handoff": {
+    "progress": "初稿已出，等待作者确认",
+    "requirements": "不补充素材以外的事实",
+    "todo": "等待作者补充体验"
+  }
+}
