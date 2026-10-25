@@ -100,6 +100,15 @@ def _resolve(root: Path, data: dict[str, Any]) -> dict[str, Any]:
             raise ValueError("B类资料由Agent发挥，必须有Agent初稿（draft_id或first_generated）")
     if not isinstance(material, str) or not material.strip():
         raise ValueError("original_material不能为空")
+    voice = dna_lib.check_voice(data.get("voice"))
+    draft_voice = dna_lib.check_voice(draft.get("voice")) if draft else None
+    if voice and draft_voice and voice != draft_voice:
+        raise ValueError(f"payload的voice与初稿记录不一致：{voice} / {draft_voice}")
+    voice = voice or draft_voice
+    if not voice and data["event_type"] == "修订" and data.get("revision_of"):
+        # 仿写稿的修订版仍是仿写稿
+        old = root / "assets" / data["revision_of"]
+        voice = dna_lib.artifact_voice(old.read_text(encoding="utf-8")) if old.is_file() else None
     final = data["confirmed_final"]
     latest = versions[-1]["text"] if versions else first
     author_lines = [line for version in versions for line in version.get("author_lines", [])]
@@ -118,14 +127,19 @@ def _resolve(root: Path, data: dict[str, Any]) -> dict[str, Any]:
         "versions": versions,
         "input_source": input_source,
         "material": material,
-        "anchors": anchors,
+        "anchors": [] if voice else anchors,
         "source_type": source_type,
+        "voice": voice,
     }
 
 
 def _review(root: Path, data: dict[str, Any], info: dict[str, Any]) -> list[dict[str, str]]:
     """锚点句由脚本判定；守住了/印证/不相关由 Agent 提供并在这里校验。"""
     _, prefs, _, _ = dna_lib.load_ledgers(root)
+    if info["voice"]:
+        if data.get("review") or data.get("anchor_overrides"):
+            raise ValueError("仿写稿不写复盘：去掉review和anchor_overrides")
+        return []
     final = _loose(data["confirmed_final"])
     rows = []
     for anchor in info["anchors"]:
@@ -352,6 +366,7 @@ def _build_artifact(data: dict[str, Any], info: dict[str, Any], rows: list[dict[
 | 素材来源 | {_table(data['source_summary'])} |
 | 输入类型 | {_table(info['input_source'])} |
 | 来源类型 | {_table(info['source_type'])} |
+| 仿写口吻 | {_table(info['voice'] or '—')} |
 | 待定区初稿 | {_table(data.get('draft_id') or '—')} |
 | 复盘 | {_table(_summary(rows))} |
 | 句子数 | {sentence_count} |
@@ -470,7 +485,8 @@ def finalize(
                 "filename": f"{date_str}-{identity}-v{version}.md",
                 "version": version,
                 "source_type": info["source_type"],
-                "style_eligible": info["source_type"] in dna_lib.ELIGIBLE_SOURCES,
+                "style_eligible": info["source_type"] in dna_lib.ELIGIBLE_SOURCES and not info["voice"],
+                "voice": info["voice"],
                 "review_table": review_table,
                 "diff_blocks": _diff_blocks(info["latest"], data["confirmed_final"]),
                 "sentence_count": sentence_count,
@@ -505,7 +521,8 @@ def finalize(
         archive_after = dna_lib.render_ledger(archive_head, archived)
 
         log_text = p["log"].read_text(encoding="utf-8")
-        log_row = f"| {stamp} | {data['event_type']} | {filename} | {filename} | {_summary(rows)} | {len(rows)} |"
+        detail = f"仿写口吻：{info['voice']}" if info["voice"] else _summary(rows)
+        log_row = f"| {stamp} | {data['event_type']} | {filename} | {filename} | {detail} | {len(rows)} |"
         if log_row in log_text:
             raise ValueError("diff-log中已存在相同记录")
         log_after = log_text.rstrip() + "\n" + log_row + "\n"
@@ -529,7 +546,7 @@ def finalize(
             old_text, count = re.subn(r"(?m)^\| 资产状态 \| active \|$", "| 资产状态 | superseded |", old_path.read_text(encoding="utf-8"), count=1)
             if count:
                 superseded[old_path] = old_text
-        eligible = "是" if info["source_type"] in dna_lib.ELIGIBLE_SOURCES else "否"
+        eligible = "是" if info["source_type"] in dna_lib.ELIGIBLE_SOURCES and not info["voice"] else "否"
         index_after = index_text.rstrip() + f"\n| {data['identity']} | {filename} | {info['source_type']} | {eligible} | active |\n"
 
         state_after = _build_state(p["state"].read_text(encoding="utf-8"), len(prefs), len(archived), data["event_type"], date_str)

@@ -37,7 +37,7 @@ reference/dna.md
 7. `reference/generic-rules.md`（通用改写）
 8. `reference/dna.md`（偏好账本）
 
-生效偏好引用了例子或边界时，再按需读取 `reference/dna-examples.md`（偏好边界）中对应条目；没有生效偏好时不编造编号或锚点句（能在稿中找到的偏好例句）。接手写到一半的文章时，用下列命令查看交接卡：
+作者说「XX 口吻」时，再读取 `reference/voices.md`（仿写口吻库），按其中规则进入仿写模式（§2.3）。生效偏好引用了例子或边界时，再按需读取 `reference/dna-examples.md`（偏好边界）中对应条目；没有生效偏好时不编造编号或锚点句（能在稿中找到的偏好例句）。接手写到一半的文章时，用下列命令查看交接卡：
 
 ```bash
 python3 scripts/draft.py show  # draft.py（草稿交接）列出未定稿记录
@@ -149,6 +149,10 @@ Agent 看文字分不出是谁写的，所以用户丢进内容时先问一次�
 
 **冲突裁决：用户原稿 > Style Card > 生效 DNA > 通用规则。** 生效偏好覆盖某项特征时，通用层不改动该特征。例如 DNA 记载「偏好反问式开头」，通用层就不把反问句当结构反模式处理。
 
+### 2.3 指定仿写口吻（单篇临时模式）
+
+作者说「XX 口吻」时进入仿写模式，规则见 `reference/voices.md`（仿写口吻库）。裁决顺序变为：**用户原稿和事实 > 指定口吻 > Style Card 与全部 DNA > 通用规则**。DNA 偏好全部暂停，不写锚点句；写作前检查块里「实际应用偏好」写「仿写模式，偏好暂停：XX 口吻」。存初稿时记 `voice`，定稿照常存档但不参与风格学习（§4.3）。
+
 ---
 
 ## 3. 润色流程
@@ -226,6 +230,7 @@ python3 scripts/draft.py revise --draft DRAFT_ID --file /tmp/revised.txt --autho
 2. 复制 `templates/finalize-payload.example.json`（定稿示例）填写（模板按「有待定区初稿」写）：
    - 有待定区初稿 → 填 `draft_id`（模板默认）；没有 → 删掉 `draft_id`，改填 `input_source`（A/B/C/D）、`original_material` 和 `first_generated`（作者直接给终稿时为 `null`；兼容旧输入的 B 类资料必须提供非空助手初稿）
    - `review`：Agent 补的复盘标签（§4.4），不填「用上了 / 被改回」
+   - 仿写稿（§2.3）：初稿已记 `voice` 的自动带上；没有初稿时在 payload 填 `"voice": "鲁迅·梦境体"`。仿写稿 `review` 留空，预览复盘表为空，存档后风格资格为「否」
    - 三维自评：自然 / 保真 / 可直接发，各 1—5 分加 ≤30 字理由。它只评价这一篇，和偏好统计无关
    - `scope=发布包` 时填平台、标题、真实存在的附件路径和附件检查结论
 3. 预览：`python3 scripts/finalize.py --payload /tmp/payload.json --dry-run`（finalize.py（定稿记账）预览 payload.json（定稿输入））。`finalize.py`（定稿记账）不写入样本和账本，可能创建锁文件；它返回依据输入记录推导的来源类型、**复盘表**和最后一版助手稿与终稿的改动块。`payload.json`（定稿输入）放系统临时目录。
@@ -340,6 +345,7 @@ python3 scripts/reject_sample.py --root . --artifact assets/目标稿.md --reaso
 | `SKILL.md`（助手规则） | 加载、来源、流程、状态门、进化协议（规则以本文件为准） |
 | `reference/style-card.md`（稳定风格） | 稳定的作者风格底盘 |
 | `reference/scene-rules.md`（场景边界） | 场景划分和各场景边界 |
+| `reference/voices.md`（仿写口吻库） | 指定仿写口吻：共同规则和各作家口吻参考（只在作者点名口吻时读） |
 | `reference/sample-policy.md`（样本来源） | 来源类型、哪些样本能当证据、版本与历史资产 |
 | `reference/generic-rules.md`（通用改写） | 通用去 AI 味规则：Tier × Level、词表、结构反模式、误杀防护、保护片段 |
 | `reference/dna.md`（偏好账本） / `dna-archive.md`（淘汰偏好） | 偏好账本（候选、生效、休眠）/ 淘汰的偏好 |
@@ -353,7 +359,7 @@ python3 scripts/reject_sample.py --root . --artifact assets/目标稿.md --reaso
 | `assets/state.md`（状态计数） | 计数 |
 | `evals/benchmark.md`（规则回归例） | 应改（SF）与不应改（SNF）的回归样本 |
 | `evals/exam/`（考试素材） / `evals/exam-runs/`（盲选结果） / `evals/exam-log.md`（考试记录） | 盲选考卷与基准 DNA / 每次考场的两版文章和答案 / 考试记录 |
-| `scripts/`（维护脚本） | `draft.py`（草稿交接）待定区、`finalize.py`（定稿记账）定稿、`dna_update.py`（偏好维护）偏好账本、`exam.py`（盲选考试）盲选考试、`reject_sample.py`（拒绝样本）拒绝、`audit_skill.py`（账本审计）审计、`style_check.py`（风格提醒）风格提醒、`dna_lib.py`（共享工具）共享工具 |
+| `scripts/`（维护脚本） | `draft.py`（草稿交接）待定区、`finalize.py`（定稿记账）定稿、`dna_update.py`（偏好维护）偏好账本、`exam.py`（盲选考试）盲选考试、`reject_sample.py`（拒绝样本）拒绝、`mark_voice.py`（补标仿写稿）补标仿写稿、`audit_skill.py`（账本审计）审计、`style_check.py`（风格提醒）风格提醒、`dna_lib.py`（共享工具）共享工具 |
 | `README.md`（使用说明） | 给人看的使用说明，不含 Agent 规则 |
 | `BOOTSTRAP.md`（兼容入口） | 兼容入口，指向本文件 |
 | `tests/`（离线测试） / `backups/`（账本备份） | 脚本测试 / 偏好账本自动备份（不进 git） |
@@ -385,6 +391,7 @@ git diff --check  # 检查未提交改动的空白错误
 | 「进化进度」「进化状态」「DNA状态」 | 运行 `python3 scripts/dna_update.py report`（dna_update.py（偏好维护）查看状态），用大白话报告各状态的偏好、统计和提示 |
 | 「以后不要用」「禁用」「偏好」「以后写作时」「不要再」「必须」「永远」 | 按 §4.7 处理 |
 | 「先标问题、不改写」「诊断模式」「annotation模式」 | 只列问题：`[位置] 问题描述（命中条款：xxx）`，不改正文 |
+| 「XX 口吻」「用 XX 的语气写」 | 读 `reference/voices.md`（仿写口吻库），按 §2.3 进入仿写模式；Agent 自己选具体口吻，交稿时说明用了哪种 |
 | 「考试」「盲选」「看看改得好不好」 | 按 §4.9 跑一次盲选考试 |
 | 「跑评测集」「测试一下」「验证规则」 | 加载 `evals/benchmark.md`（规则回归例），报告 SF 命中率、SNF 放行率；「像本人」不自动打分，交给作者判断 |
 | 「恢复未完成存档」或遇到未完成存档提示 | 按 §4.3 先保存当前副本、核对恢复记录，再运行 `finalize.py`（定稿记账）的 `--recover`；此操作会覆盖或移除日志记录的文件 |

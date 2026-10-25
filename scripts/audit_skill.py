@@ -114,6 +114,12 @@ def main() -> int:
             findings.append(f"active资产未登记style-index: {path.name}")
         elif row and (row["identity"] != meta["身份键"] or row["source_type"] != meta["来源类型"] or row["status"] != meta["资产状态"]):
             findings.append(f"资产元数据与style-index不一致: {path.name}")
+        # 仿写稿只存档，不参与风格学习
+        if dna_lib.artifact_voice(text):
+            if row and row["eligible"] == "是":
+                findings.append(f"仿写稿不能有风格资格: {path.name}")
+            if any(r["sample"] == path.name and r["state"] == "有效" for r in reviews):
+                findings.append(f"仿写稿不能有有效复盘: {path.name}")
 
     # 5. 待定区文件能读、字段齐全
     for draft_path in sorted(p["drafts"].glob("*.json")) if p["drafts"].exists() else []:

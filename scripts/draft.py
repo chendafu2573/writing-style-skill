@@ -32,6 +32,8 @@ def validate(root: Path, data: dict) -> None:
     anchors = data.get("anchors", [])
     if not isinstance(anchors, list):
         raise ValueError("anchors必须是列表")
+    if dna_lib.check_voice(data.get("voice")) and anchors:
+        raise ValueError("仿写口吻模式下偏好全部暂停，不记锚点句")
     _, prefs, _, _ = dna_lib.load_ledgers(root)
     seen = set()
     for anchor in anchors:
@@ -64,6 +66,7 @@ def save(root: Path, data: dict) -> dict:
         "first_generated": data["first_generated"],
         "agent_versions": [],
         "anchors": data.get("anchors", []),
+        "voice": dna_lib.check_voice(data.get("voice")),
         "handoff": data.get("handoff", {}),
         "finalized_as": None,
     }

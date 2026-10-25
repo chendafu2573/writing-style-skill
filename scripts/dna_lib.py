@@ -30,7 +30,7 @@ TAGS = ("用上了", "守住了", "被改回", "印证", "不相关")
 SCRIPT_TAGS = {"用上了", "被改回"}  # 助手不能自填；作者纠正走 anchor_overrides
 ELIGIBLE_SOURCES = {"user_original", "user_revision"}
 VALID_SOURCE_TYPES = {"user_original", "agent_draft", "user_revision", "mixed", "reference_text"}
-REVIEW_STATES = {"有效", "作废", "被替代"}
+REVIEW_STATES = {"有效", "作废", "被替代", "仿写"}
 
 # 门槛（2026-10-17 作者确认，见 PROJECT.md §2.3）
 EVIDENCE_NEEDED = 2
@@ -65,6 +65,20 @@ def paths(root: Path) -> dict[str, Path]:
         "drafts": root / "drafts",
         "backups": root / "backups",
     }
+
+
+def check_voice(value) -> str | None:
+    """仿写口吻名；None 表示不是仿写稿。不能含竖线或换行，以免破坏表格。"""
+    if value is None:
+        return None
+    if not isinstance(value, str) or not value.strip() or len(value.strip()) > 30 or any(c in value for c in "|\n\r"):
+        raise ValueError("voice必须是1到30字的口吻名，不能含竖线或换行")
+    return value.strip()
+
+
+def artifact_voice(text: str) -> str | None:
+    match = re.search(r"(?m)^\| 仿写口吻 \| (.*?) \|$", text)
+    return None if not match or match.group(1).strip() in {"", "—"} else match.group(1).strip()
 
 
 def require_no_pending_finalize(root: Path) -> None:
