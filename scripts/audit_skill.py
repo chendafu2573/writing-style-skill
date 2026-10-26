@@ -95,7 +95,10 @@ def main() -> int:
         if row["status"] != "active" and row["eligible"] == "是":
             findings.append(f"非active资产不能标记为风格资格: {filename}")
         if row["source_type"] == "user_original" and row["status"] == "active" and row["eligible"] != "是":
-            findings.append(f"用户原稿风格资格错误: {filename}")
+            # 作者原稿标了仿写口吻时，资格为否是对的
+            path = assets / filename
+            if not (path.is_file() and dna_lib.artifact_voice(path.read_text(encoding="utf-8"))):
+                findings.append(f"用户原稿风格资格错误: {filename}")
     for identity, filenames in active_by_identity.items():
         if len(filenames) > 1:
             findings.append(f"同一身份键有多个active样本: {identity} {', '.join(filenames)}")

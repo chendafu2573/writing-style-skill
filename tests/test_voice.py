@@ -69,6 +69,9 @@ class VoiceFinalizeTests(unittest.TestCase):
             result = finalize.finalize(root, payload("王小波", voice="王小波"))
             self.assertIn("| user_original | 否 | active |", index_text(root))
             self.assertTrue(result["filename"])
+            # 作者原稿用了口吻，资格为否是对的，审计不能误报
+            audit = run("audit_skill", "--root", root)
+            self.assertEqual(0, audit.returncode, audit.stdout)
 
     def test_payload_voice_must_match_draft_voice(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -108,6 +111,27 @@ class MarkVoiceTests(unittest.TestCase):
             self.assertEqual(0, run("audit_skill", "--root", root).returncode)
             again = run("mark_voice", "--root", root, "--artifact", artifact, "--voice", "鲁迅·梦境体")
             self.assertNotEqual(0, again.returncode)
+
+    def test_mark_user_original_keeps_audit_passing(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = make_root(tmp)
+            result = finalize.finalize(root, payload())
+            artifact = Path(root) / "assets" / result["filename"]
+            done = run("mark_voice", "--root", root, "--artifact", artifact, "--voice", "鲁迅")
+            self.assertEqual(0, done.returncode, done.stderr)
+            self.assertIn("| user_original | 否 | active |", index_text(root))
+            audit = run("audit_skill", "--root", root)
+            self.assertEqual(0, audit.returncode, audit.stdout)
+
+    def test_audit_still_requires_plain_user_original_to_be_eligible(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = make_root(tmp)
+            finalize.finalize(root, payload())
+            index = Path(root) / "assets" / "style-index.md"
+            index.write_text(index.read_text(encoding="utf-8").replace("| user_original | 是 |", "| user_original | 否 |"), encoding="utf-8")
+            audit = run("audit_skill", "--root", root)
+            self.assertEqual(1, audit.returncode)
+            self.assertIn("用户原稿风格资格错误", audit.stdout)
 
     def test_audit_catches_voice_sample_still_learning(self):
         with tempfile.TemporaryDirectory() as tmp:
