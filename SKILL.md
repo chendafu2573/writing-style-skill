@@ -37,7 +37,7 @@ reference/dna.md
 7. `reference/generic-rules.md`（通用改写）
 8. `reference/dna.md`（偏好账本）
 
-作者说「XX 口吻」时，再读取 `reference/voices.md`（仿写口吻库），按其中规则进入仿写模式（§2.3）。生效偏好引用了例子或边界时，再按需读取 `reference/dna-examples.md`（偏好边界）中对应条目；没有生效偏好时不编造编号或锚点句（能在稿中找到的偏好例句）。接手写到一半的文章时，用下列命令查看交接卡：
+写某个项目（产品介绍、活动帖、项目分析）时，再读取 `reference/project-research.md`（项目查证流程），先查证再写。作者说「XX 口吻」时，再读取 `reference/voices.md`（仿写口吻库），按其中规则进入仿写模式（§2.3）。生效偏好引用了例子或边界时，再按需读取 `reference/dna-examples.md`（偏好边界）中对应条目；没有生效偏好时不编造编号或锚点句（能在稿中找到的偏好例句）。接手写到一半的文章时，用下列命令查看交接卡：
 
 ```bash
 python3 scripts/draft.py show  # draft.py（草稿交接）列出未定稿记录
@@ -355,6 +355,7 @@ python3 scripts/reject_sample.py --root . --artifact assets/目标稿.md --reaso
 | `reference/style-card.md`（稳定风格） | 稳定的作者风格底盘 |
 | `reference/scene-rules.md`（场景边界） | 场景划分和各场景边界 |
 | `reference/voices.md`（仿写口吻库） | 指定仿写口吻：共同规则和各作家口吻参考（只在作者点名口吻时读） |
+| `reference/project-research.md`（项目查证流程） | 写项目推文前的查证流程：来源、核对实时数据、分清官方说/查得到/查不到、活动规则（只在写项目时读） |
 | `reference/sample-policy.md`（样本来源） | 来源类型、哪些样本能当证据、版本与历史资产 |
 | `reference/generic-rules.md`（通用改写） | 通用去 AI 味规则：Tier × Level、词表、结构反模式、误杀防护、保护片段 |
 | `reference/dna.md`（偏好账本） / `dna-archive.md`（淘汰偏好） | 偏好账本（候选、生效、休眠）/ 淘汰的偏好 |
